@@ -1,0 +1,111 @@
+<html>
+	<head>
+		<title>Mantıksal Kapı Devreleri</title>
+
+		<link rel="stylesheet" href="css/style.css"> 
+ 
+ 		<script src="js/utils.js"></script>
+		<script src="js/kapilar.js"></script>
+		<script src="js/mantikkapisi.js"></script>
+		<script>
+			function onload () {
+				mantiksalKapi = new mantikKapisi.mantiksalKapi.SimpleLogic(document.getElementById("drawCanvas"), document.getElementById("overlay"));//mantikkapisi.js dosyasında ki anafonksiyondan türetme yapıyor
+				setTimeout(function () {
+				menuYukle(mantiksalKapi)});  //menuYukle  fonksiyonuna türetilen canvas(zemini) ve overlay(div konumu bilgisi) gönderiyor
+				
+			}
+
+			var menuYuklendiMi = false; //menunun yüklenip yüklenmediğini kontrol etmek için boolean değişken
+
+			function menuYukle (target) { // açılış ekranında sol taraftaki menu içeriğini ayarlıyor, index ekranına devre elemanlarının olduğu menüyü yüklüyor
+			
+			var items = document.getElementsByClassName("kapi"); // menuyu yani ekranın kenarında bulunan kapı ikonlarının bulunduğu alana yüklenecek itemler (kapılar AND OR XOR vs)
+			if (menuYuklendiMi) {
+				return;
+			}
+			menuYuklendiMi = true;
+			for (var k = 0; k < items.length; k++) { //menuye yüklencek kapı nesneleri içinde dönüyor
+				if (items[k].id) {
+					var item = new mantikKapisi.mantiksalKapi.Node({type: items[k].id}); //kapıların içindeki  tek kapı için değişken
+					var image = item.propertys.getImage(item);  //kapılar için image yani AND OR için görsel özellik ekleniyor
+					image.className = "dugumCiz"; // görsele class veriliyor
+					items[k].appendChild(image); //iteme görsel ekleniyor
+					var mousedown = function mousedown (target, event) {  // menudeki kapıları fare ile seçerken olacak işlemler (event)	
+						var x = event.clientX - Math.floor(target.divKonumu.getBoundingClientRect().left) - (event.clientX - Math.floor(event.target.getBoundingClientRect().left)), 
+						y = event.clientY - Math.floor(target.divKonumu.getBoundingClientRect().top) - (event.clientY - Math.floor(event.target.getBoundingClientRect().top));  // x ve y konumuna göre zeminden kapının seçiminin ekrana sürüklenmesinden önceki kısım
+						x = Math.round(x / 10) * 10;
+						y = Math.round(y / 10) * 10;
+						
+						var kapi = target.addNode(this, x, y); // seçilen x ve y konumuna göre o konuma ait kapı nesnesi oluşturuluyor
+						
+						//target seçme işleminden sonra menuden kapının sürüklenmesi ve diğer işlemlerin verildiği nesne
+						target.divKonumu.appendChild(target.domElementOfNode(kapi)); //hedeflenen kapı yani fare ile seçilen kapı target ' a ekleniyor
+						
+						var image = document.getElementById(kapi.id + "_image"); //39. satırda türetilen kapı nesnesinin id sine göre o kapıya ait resim alınıyor
+						target.draggingNode = image; //kapı sürüklenirkenki resmi
+						image.draggingStartX = event.clientX - Math.floor(event.target.getBoundingClientRect().left); // kapının sürüklenmeye başladığı konumu (x)
+						image.draggingStartY = event.clientY - Math.floor(event.target.getBoundingClientRect().top); // kapının sürüklenmeye başladığı konumu (y)
+						image.dragStartTime = Date.now(); //bu kısımda kapıya tıklanıp menuden çekildikten sonraki havada tutulurken , ana zemine kapıyı bırakmak için süre veriliyor fare tıklanması sonlanınca kapı zemine koyulcak
+
+						document.getElementById("menu").style.opacity = "0.3"; // kapı seçilince menunun saydamlığı
+						
+					}.bind(items[k].id, target); // seçilen kapıyla hedeflenen kapıyı bağlıyor
+					image.addEventListener("mousedown", mousedown); // eventlar ekleniyor
+					image.addEventListener("touchstart", function (cb, event) { // kapı seçildikten sonra başlamak için
+					
+					
+					}.bind(this, mousedown));
+				}
+			}
+		}
+
+	 		</script>
+
+		<meta name="viewport" content="width=device-width">
+	</head>
+	<body> 
+		<div class="delete"><div align="center" style="font-size: 30px;"><img src="copkutusu.png" alt="resim"  width="85" height="85"></div></div>
+		<div id="menu" class="menu">
+			
+		
+			<div class="menuNesne">
+ 				<div id="Giris" class="kapi"></div>
+			</div>
+			<div class="menuNesne">
+ 				<div id="AND" class="kapi"></div><br>
+ 				<div id="AND3" class="kapi"></div><br>
+			</div>
+			<div class="menuNesne">
+ 				<div id="NAND" class="kapi"></div><br>
+ 				<div id="NAND3" class="kapi"></div><br>
+			</div>
+			<div class="menuNesne">
+ 				<div id="OR" class="kapi"></div><br>
+ 				<div id="OR3" class="kapi"></div><br>
+			</div>
+			<div class="menuNesne">
+				<div id="NOR" class="kapi"></div><br> 
+				<div id="NOR3" class="kapi"></div><br>
+			</div>
+
+			<div class="menuNesne">
+				<div id="XOR" class="kapi"></div><br>
+				<div id="XNOR" class="kapi"></div><br>
+				<div id="NOT" class="kapi"></div><br>
+			</div>
+			<div class="menuNesne"> 
+				<div id="Cikis" class="kapi"></div>
+			</div>
+		</div>
+		<div class="alan">
+			<canvas id="drawCanvas" class="cizimBolgesi"></canvas>
+			<div id="overlay" class="cizimBolgesi"></div>
+		</div>
+
+		<script>
+			// css html kodları yüklendikten sonra onload fonksiyonunu tetikliyor , en baştaki script tagları arasında
+			onload();
+		</script> 
+
+	</body>
+</html>
